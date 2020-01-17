@@ -106,6 +106,7 @@ def save_functions(functions):
         with open('db.json', "w+") as file:
             file.write(json.dumps(to_write))
             file.close()
+            return True
     except IOError as e:
         errno, strerror = e.args
         print("[-] I/O error ({}): {}\n[-] No file written".format(errno, strerror))
@@ -157,5 +158,5 @@ if __name__ == '__main__':
 
     save_db = save_functions(substitutions)
     if save_db:
-        print("[+] Saving to db file")
-    print("\n[+] Done. Output file located at " + args.outputfile)
+        print("\n[+] Saving to db file")
+    print("[+] Done. Output file located at " + args.outputfile)
