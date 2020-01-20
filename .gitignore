@@ -127,3 +127,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+powpow2.ps1

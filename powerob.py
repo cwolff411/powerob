@@ -46,7 +46,7 @@ def save_functions(filename, functions):
     to_write[filename] = functions
 
     try:
-        with open('db.json', "w+") as file:
+        with open('db.json', "a+") as file:
             file.write(json.dumps(to_write))
             file.close()
             return True
@@ -54,8 +54,8 @@ def save_functions(filename, functions):
         errno, strerror = e.args
         print("[-] I/O error ({}): {}\n[-] No file written".format(errno, strerror))
     except: #handle other exceptions such as attribute errors
-        print("Unexpected error saving to db file: ", sys.exc_info()[0])
-    pass
+        print("Unexpected error saving to db file: ", sys.exc_info())
+
 
 def find_functions(input):
     print("[+] Loading the Powershell script")
@@ -127,14 +127,19 @@ def write_obfuscated_file(inputfile, outputfile, functions):
         exit()
     pass
 
+#
+#
+# Start of class
+#
+#
 class PowerOb(object):
 
     def __init__(self):
         parser = argparse.ArgumentParser(description='Pretends to be git',usage='''powerob.py <command> [<args>]
             Possible Commands:
-            obfuscate - Obfuscate new powershell script
-            list - List obfuscated files and their commands
-            getcommand - Get a particular command from an obfuscated file
+            <obfuscate> // Obfuscate new powershell script
+            <list> // List obfuscated files and their commands
+            <getcommand> // Get a particular command from an obfuscated file
 
             Try powerob.py <command> -h for help with a particular command.
             ''')
