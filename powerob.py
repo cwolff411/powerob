@@ -13,7 +13,8 @@ import sqlite3
 
 # Suppressed because of weird future warning with regex
 warnings.simplefilter(action='ignore', category=FutureWarning)
-dashline = '-' * 75
+dashline = "-" * 75
+db_name = "./powerob.db"
 
 def banner():
     print(r"""
@@ -51,11 +52,11 @@ def color(text):
 	
 
 
-# Adds the new functions/obfuscated functions to the db file. e.g. filename => original function: obfuscated function
+# Adds the new functions/obfuscated functions to the db file. 
 def save_functions(filename, functions):
 
     try:
-        conn = sqlite3.connect('powerob.db')
+        conn = sqlite3.connect(db_name)
         cursor = conn.cursor()
 
         sql = '''CREATE TABLE IF NOT EXISTS Files
@@ -89,7 +90,7 @@ def save_functions(filename, functions):
 
     except:
         
-        print(color("[-] Unexpected error:", sys.exc_info()))
+        print(color("[-] Unexpected error: {}".format(sys.exc_info())))
         return False
 
 
@@ -176,12 +177,12 @@ class PowerOb(object):
             <obfuscate> // Obfuscate new powershell script
             <list> // List obfuscated files and their commands
             <getcommand> // Get a particular command from an obfuscated file
+            <cleardb> // Clears the database of previously obfuscated files and functions
 
             Try powerob.py <command> -h for help with a particular command.
             ''')
         parser.add_argument('command', help='Command to run')
-        # parse_args defaults to [1:] for args, but you need to
-        # exclude the rest of the args too, or validation will fail
+
         args = parser.parse_args(sys.argv[1:2])
         if not hasattr(self, args.command):
             print (color('[-] Unrecognized command'))
@@ -193,14 +194,12 @@ class PowerOb(object):
 
     def obfuscate(self):
         parser = argparse.ArgumentParser(description='Obfuscate a new Powershell script.')
-        # prefixing the argument with -- means it's optional
         parser.add_argument('inputfile', type=str)
         parser.add_argument('outputfile', type=str)
 
         db_check()
 
         args = parser.parse_args(sys.argv[2:])
-
 
         # Find the functions. Returns list of functions in the inputfile
         functions = find_functions(args.inputfile)
@@ -228,8 +227,12 @@ class PowerOb(object):
     def list(self):
         parser = argparse.ArgumentParser(description='List all obfuscated files and their commands.')
 
+        if not os.path.exists(db_name):
+            print(color("[-] No functions or files have been obfuscated."))
+            exit()
+
         try:
-            conn = sqlite3.connect('powerob.db')
+            conn = sqlite3.connect(db_name)
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
@@ -253,14 +256,11 @@ class PowerOb(object):
 
             print(color("[+] Done listing files. Over and out."))
 
-        except IOError as e:
+        except OSError as e:
             errno, strerror = e.args
-            if errno == 2:
-                print(color('[-] No obfuscated files found!'))
-            else:
-                print(color("[-] I/O error ({}): {}".format(errno, strerror)))
+            print(color("[-] I/O error ({}): {}".format(errno, strerror)))
         except: #handle other exceptions such as attribute errors
-            print(color("[-] Unexpected error opening db file: " + sys.exc_info()[0]))
+            print(color("[-] Unexpected error opening db file: " + str(sys.exc_info())))
         pass
 
 
@@ -270,7 +270,7 @@ class PowerOb(object):
         parser.add_argument('scriptcommand', type=str, help='The name of the command from the original script that you would like the obfuscated equivalent.')
         args = parser.parse_args(sys.argv[2:])
 
-        conn = sqlite3.connect('powerob.db')
+        conn = sqlite3.connect(db_name)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute("SELECT FILE_NAME, OG_FUNCTION, OB_FUNCTION FROM Functions WHERE OG_FUNCTION LIKE :function",{"function":args.scriptcommand})
@@ -288,9 +288,19 @@ class PowerOb(object):
             for f in rows:
                     print('{:25s}{:<25s}{:>25s}'.format(f['FILE_NAME'],f['OG_FUNCTION'],f['OB_FUNCTION'])) 
 
+    # Helper command to clear the database
+    def cleardb(self):
+        try:
+            if os.path.exists("powerob.db"):
+                os.remove("powerob.db")
+                print(color("[+] Db cleared. See yaaaaaa"))
+        except OSError as e:
+            errno, strerror = e.args
+            print(color("[-] Error clearing db: " + strerror))
+
     # Debug function
     def showdb(self):
-            conn = sqlite3.connect('powerob.db')
+            conn = sqlite3.connect(db_name)
 
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM Functions")
