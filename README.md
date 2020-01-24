@@ -23,9 +23,6 @@ For reference on the fly for when you forget. Takes the original command name an
 Maintenance function to clear the db of past obfuscated files and functions.
 
 ### About
-author: Cory Wolff
-company: [Layer 8](https://layer8security.com) 
-
 This was built out of the need to bypass endpoint security on a recent engagement. During priv esc attempts I could not download [PowerUp.ps1](https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1) until it was obfuscated.
 
 This is v1. It obfuscates the functions only and I will enhance the functionality as time allows. Pull requests and collaboration welcomed.
