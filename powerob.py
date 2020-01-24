@@ -266,10 +266,29 @@ class PowerOb(object):
 
     def getcommand(self):
         parser = argparse.ArgumentParser(description='Get a particular command from an obfuscated file.')
-        parser.add_argument('file', type=str, help='The name of the obfuscated file.')
+        #parser.add_argument('file', type=str, help='The name of the obfuscated file.')
         parser.add_argument('scriptcommand', type=str, help='The name of the command from the original script that you would like the obfuscated equivalent.')
         args = parser.parse_args(sys.argv[2:])
 
+        conn = sqlite3.connect('powerob.db')
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT FILE_NAME, OG_FUNCTION, OB_FUNCTION FROM Functions WHERE OG_FUNCTION LIKE :function",{"function":args.scriptcommand})
+
+        rows = cursor.fetchall()
+
+        if len(rows) == 0:
+            print(color("[-] No commands found. Sorry bub."))
+        else:
+
+            print(color("[*] " + str(len(rows)) + " Command(s) Found"))
+
+            print('{:<25s}{:<25s}{:>25s}'.format("Obfuscated File", "Original Function","Obfuscated Function"))
+            print(dashline)
+            for f in rows:
+                    print('{:25s}{:<25s}{:>25s}'.format(f['FILE_NAME'],f['OG_FUNCTION'],f['OB_FUNCTION'])) 
+
+    # Debug function
     def showdb(self):
             conn = sqlite3.connect('powerob.db')
 
