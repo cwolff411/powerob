@@ -9,6 +9,7 @@ import random
 import string
 import json
 import warnings
+import sqlite3
 
 # Suppressed because of weird future warning with regex
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -29,45 +30,80 @@ def banner():
 
 def python_check():
     if sys.version_info.major != 3:
-        print("[*] Please run with Python 3. Python 2 is ded.")
+        print(color("[-] Please run with Python 3. Python 2 is ded."))
         exit()
 
 def db_check():
     if not path.exists('db.json'):
         return False
     else:
-        print("[*] Db file found")
+        print(color("[*] Db file found"))
         return True
+
+def color(text):
+
+	if text.startswith('[+]'):
+		return "\033[%d;3%dm%s\033[0m" % (0, 2, text)
+	if text.startswith('[-]'):
+		return "\033[%d;3%dm%s\033[0m" % (0, 1, text)
+	if text.startswith('[*]'):
+		return "\033[%d;3%dm%s\033[0m" % (0, 3, text)
+	
+
 
 # Adds the new functions/obfuscated functions to the db file. e.g. filename => original function: obfuscated function
 def save_functions(filename, functions):
 
-    to_write = {}
-    to_write[filename] = functions
-
     try:
-        with open('db.json', "a+") as file:
-            file.write(json.dumps(to_write))
-            file.close()
-            return True
-    except IOError as e:
-        errno, strerror = e.args
-        print("[-] I/O error ({}): {}\n[-] No file written".format(errno, strerror))
-    except: #handle other exceptions such as attribute errors
-        print("Unexpected error saving to db file: ", sys.exc_info())
+        conn = sqlite3.connect('powerob.db')
+        cursor = conn.cursor()
+
+        sql = '''CREATE TABLE IF NOT EXISTS Files
+                (FID INTEGER PRIMARY KEY AUTOINCREMENT,
+                FILENAME VARCHAR(42))'''
+        cursor.execute(sql)
+
+        sql = '''CREATE TABLE IF NOT EXISTS Functions
+                (FID INTEGER PRIMARY KEY AUTOINCREMENT,
+                FILE_NAME VARCHAR(42),
+                OG_FUNCTION VARCHAR(42),
+                OB_FUNCTION VARCHAR(42))'''
+        cursor.execute(sql)
+
+        cursor.execute("SELECT * FROM Files WHERE FILENAME = :og_file", {"og_file": filename})
+        rows = cursor.fetchall()
+
+        if len(rows) > 0:
+            # The file has been obfuscated before. Removed old functions from db and add new ones
+            cursor.execute("DELETE FROM Functions WHERE FILE_NAME = :file", {"file": filename})
+
+            for f in functions.items():
+                cursor.execute("INSERT INTO Functions(FILE_NAME, OG_FUNCTION, OB_FUNCTION) VALUES (?,?,?)", (filename, f[0],f[1]))
+        else:
+            # File is not in db so add filename to Files table and add functions to Functions table
+            cursor.execute("INSERT INTO Files(FILENAME) VALUES(?)", (filename, ))
+            for f in functions.items():
+                cursor.execute("INSERT INTO Functions(FILE_NAME, OG_FUNCTION, OB_FUNCTION) VALUES (?,?,?)", (filename, f[0],f[1]))
+        conn.commit()
+        return True
+
+    except:
+        
+        print(color("[-] Unexpected error:", sys.exc_info()))
+        return False
 
 
 def find_functions(input):
-    print("[+] Loading the Powershell script")
+    print(color("[+] Loading the Powershell script"))
 
     function_pattern = r'(function\s([A-Z]{1}[a-z]{2,10})-([A-Z]{1}[a-z]+[A-Z]{1}([^\s||^(]+)))'
     if not input.endswith('.ps1'):
-        print("[-] Error: The input file must end with .ps1")
+        print(color("[-] Error: The input file must end with .ps1"))
         exit()
 
     try:
         f = open(input,"r")
-        print("[+] Locating functions")
+        print(color("[+] Locating functions"))
         contents = f.read()
         funcs = re.findall(function_pattern, contents)
         
@@ -79,18 +115,18 @@ def find_functions(input):
 
             return function_names
         else:
-            print("[-] No Functions Found. Exiting...")
+            print(color("[-] No Functions Found. Exiting..."))
             exit()
 
     except IOError as e:
       errno, strerror = e.args
-      print("[-] I/O error({0}): {1}".format(errno,strerror))
+      print(color("[-] I/O error({0}): {1}".format(errno,strerror)))
     except: #handle other exceptions such as attribute errors
-      print("[-] Unexpected error:", sys.exc_info()[0])
+      print(color("[-] Unexpected error:" + sys.exc_info()[0]))
     pass
 
 def create_obfuscated_functions(functions):
-    print("[+] Obfuscating functions")
+    print(color("[+] Obfuscating functions"))
 
     # Create list for old function names with corresponding obfuscated function
     substitutions = {}
@@ -120,10 +156,10 @@ def write_obfuscated_file(inputfile, outputfile, functions):
 
     except IOError as e:
         errno, strerror = e.args
-        print("[-] I/O error ({}): {}".format(errno, strerror))
+        print(color("[-] I/O error ({}): {}".format(errno, strerror)))
         exit()
     except: #handle other exceptions such as attribute errors
-        print("Unexpected error yo:", sys.exc_info())
+        print(color("[-] Unexpected error yo:" + sys.exc_info()))
         exit()
     pass
 
@@ -148,7 +184,7 @@ class PowerOb(object):
         # exclude the rest of the args too, or validation will fail
         args = parser.parse_args(sys.argv[1:2])
         if not hasattr(self, args.command):
-            print ('Unrecognized command')
+            print (color('[-] Unrecognized command'))
             parser.print_help()
             exit(1)
         # use dispatch pattern to invoke method with same name
@@ -185,40 +221,46 @@ class PowerOb(object):
 
             save_db = save_functions(args.outputfile, obfuscated_functions)
             if save_db:
-                print("\n[+] Saving to db file")
-            print("[+] Done. Output file located at " + args.outputfile)
+                print("\n")
+                print(color("[+] Saving to db file"))
+            print(color("[+] Done. Output file located at " + args.outputfile))
 
     def list(self):
         parser = argparse.ArgumentParser(description='List all obfuscated files and their commands.')
 
         try:
-            with open('db.json') as file:
-                g = json.load(file)
+            conn = sqlite3.connect('powerob.db')
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
 
-                if file == None:
-                    print ("[-] No obfuscated files found!")
+            cursor.execute("SELECT * FROM Files")
+            file_rows = cursor.fetchall()
+
+            for filename in file_rows:
+
+                print(color('[*] Obfuscated File: ' + filename['FILENAME']))
+
+                print('{:<30s}{:>30s}'.format("Original Function","Obfuscated Function"))
+                print(dashline)
+
+                cursor.execute("SELECT * FROM Functions WHERE FILE_NAME = :filename", {"filename": filename['FILENAME']})
+                function_rows = cursor.fetchall()
+
+                for f in function_rows:
+                    print('{:<30}{:>25}'.format(f['OG_FUNCTION'],f['OB_FUNCTION']))       
                 
-                for filename, funcs in g.items():
+                print(dashline+"\n")
 
-                    print("\n" + dashline)
-                    print('Obfuscated File: ' + filename)
-
-                    print('{:<30s}{:>30s}'.format("Original Function","Obfuscated Function"))
-                    print(dashline)
-
-                    for f in funcs.items():
-                        print('{:<30}{:>25}'.format(f[0],f[1]))       
-                    print(dashline)
-            print("[+] Done")
+            print(color("[+] Done listing files. Over and out."))
 
         except IOError as e:
             errno, strerror = e.args
             if errno == 2:
-                print('[-] No obfuscated files found!')
+                print(color('[-] No obfuscated files found!'))
             else:
-                print("[-] I/O error ({}): {}".format(errno, strerror))
+                print(color("[-] I/O error ({}): {}".format(errno, strerror)))
         except: #handle other exceptions such as attribute errors
-            print("Unexpected error opening db file: ", sys.exc_info()[0])
+            print(color("[-] Unexpected error opening db file: " + sys.exc_info()[0]))
         pass
 
 
@@ -226,7 +268,14 @@ class PowerOb(object):
         parser = argparse.ArgumentParser(description='Get a particular command from an obfuscated file.')
         parser.add_argument('file', type=str, help='The name of the obfuscated file.')
         parser.add_argument('scriptcommand', type=str, help='The name of the command from the original script that you would like the obfuscated equivalent.')
-        args= parser.parse_args(sys.argv[2:])
+        args = parser.parse_args(sys.argv[2:])
+
+    def showdb(self):
+            conn = sqlite3.connect('powerob.db')
+
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM Functions")
+            print(cursor.fetchall())
 
 
 
