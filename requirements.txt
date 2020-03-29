@@ -1,0 +1,11 @@
+lxml==4.3.2
+cryptography==2.6.1
+brotli==1.0.7
+Cython==0.29.16
+ipaddr==2.2.0
+keyring==21.2.0
+numpy==1.18.2
+ordereddict==1.1
+protobuf==3.11.3
+pyOpenSSL==19.1.0
+wincertstore==0.2
