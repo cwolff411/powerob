@@ -97,7 +97,7 @@ def save_functions(filename, functions):
 def find_functions(input):
     print(color("[+] Loading the Powershell script"))
 
-    function_pattern = r'(function\s([A-Z]{1}[a-z]{2,10})-([A-Z]{1}[a-z]+[A-Z]{1}([^\s||^(]+)))'
+    function_pattern = r'([Ff]unction\s([A-Z]{1}[a-z]{2,10})-([A-Z]{1}[a-z]+[A-Z]{1}([^\s||^(]+)))'
     if not input.endswith('.ps1'):
         print(color("[-] Error: The input file must end with .ps1"))
         exit()
