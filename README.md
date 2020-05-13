@@ -5,21 +5,20 @@ An on-the-fly Powershell script obfuscator meant for red team engagements. Built
 `git clone https://github.com/cwolff411/powerob`
 
 ### Usage
-
-![PowerOb](https://user-images.githubusercontent.com/8293038/81839384-7059b300-9515-11ea-912a-c9432a5e0287.png)
 `python3 powerob.py obfuscate originalfile.ps1 obfuscatedfile.ps1`
+![PowerOb](https://user-images.githubusercontent.com/8293038/81839384-7059b300-9515-11ea-912a-c9432a5e0287.png)
 
 Takes an INPUTFILE obfuscates it and dumps the obfuscated version into OUTPUTFILE.
 
 * * *
-![PowerOb](https://user-images.githubusercontent.com/8293038/81839399-751e6700-9515-11ea-86c7-d9374221f483.png)
 `python3 powerob.py list`
+![PowerOb](https://user-images.githubusercontent.com/8293038/81839399-751e6700-9515-11ea-86c7-d9374221f483.png)
 
 Lists all of the currently obfuscated files along with their commands and associated obfuscated commands.
 
 * * *
+`python3 powerob.py getcommand COMMAND_NAME`
 ![PowerOb](https://user-images.githubusercontent.com/8293038/81839407-78195780-9515-11ea-8b0e-58d7bd44b783.png)
-`python3 powerob.py getcommand Invoke-AllChecks`
 
 For reference on the fly for when you forget. Takes the original command name and displays the obfuscated command name to be used in Powershell.
 
