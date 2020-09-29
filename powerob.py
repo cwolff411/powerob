@@ -172,7 +172,7 @@ def write_obfuscated_file(inputfile, outputfile, functions):
 class PowerOb(object):
 
     def __init__(self):
-        parser = argparse.ArgumentParser(description='Pretends to be git',usage='''powerob.py <command> [<args>]
+        parser = argparse.ArgumentParser(usage='''powerob.py <command> [<args>]
             Possible Commands:
             <obfuscate> // Obfuscate new powershell script
             <list> // List obfuscated files and their commands
