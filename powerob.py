@@ -17,6 +17,11 @@ dashline = "-" * 75
 db_name = "./powerob.db"
 
 def banner():
+    """
+    Banana banana
+
+    Args:
+    """
     print(r"""
        ___                        ___ _     
       / _ \_____      _____ _ __ /___| |__  
@@ -30,11 +35,21 @@ def banner():
     print(dashline + "\n")
 
 def python_check():
+    """
+    Check if the current python 3.
+
+    Args:
+    """
     if sys.version_info.major != 3:
         print(color("[-] Please run with Python 3. Python 2 is ded."))
         exit()
 
 def db_check():
+    """
+    Check if a database file exists.
+
+    Args:
+    """
     if not path.exists('db.json'):
         return False
     else:
@@ -42,6 +57,12 @@ def db_check():
         return True
 
 def color(text):
+    """
+    Return text.
+
+    Args:
+        text: (str): write your description
+    """
 
 	if text.startswith('[+]'):
 		return "\033[%d;3%dm%s\033[0m" % (0, 2, text)
@@ -54,6 +75,13 @@ def color(text):
 
 # Adds the new functions/obfuscated functions to the db file. 
 def save_functions(filename, functions):
+    """
+    Saves functions to a file.
+
+    Args:
+        filename: (str): write your description
+        functions: (dict): write your description
+    """
 
     try:
         conn = sqlite3.connect(db_name)
@@ -95,6 +123,12 @@ def save_functions(filename, functions):
 
 
 def find_functions(input):
+    """
+    Find all functions.
+
+    Args:
+        input: (array): write your description
+    """
     print(color("[+] Loading the Powershell script"))
 
     function_pattern = r'([Ff]unction\s([A-Z]{1}[a-z]{2,10})-([A-Z]{1}[a-z]+[A-Z]{1}([^\s||^(]+)))'
@@ -127,6 +161,12 @@ def find_functions(input):
     pass
 
 def create_obfuscated_functions(functions):
+    """
+    Generate a list of colors.
+
+    Args:
+        functions: (todo): write your description
+    """
     print(color("[+] Obfuscating functions"))
 
     # Create list for old function names with corresponding obfuscated function
@@ -141,6 +181,14 @@ def create_obfuscated_functions(functions):
     return substitutions
 
 def write_obfuscated_file(inputfile, outputfile, functions):
+    """
+    Write the input file to the output file.
+
+    Args:
+        inputfile: (str): write your description
+        outputfile: (str): write your description
+        functions: (todo): write your description
+    """
 
     try:
         # Open the file
@@ -172,6 +220,12 @@ def write_obfuscated_file(inputfile, outputfile, functions):
 class PowerOb(object):
 
     def __init__(self):
+        """
+        Parse command
+
+        Args:
+            self: (todo): write your description
+        """
         parser = argparse.ArgumentParser(usage='''powerob.py <command> [<args>]
             Possible Commands:
             <obfuscate> // Obfuscate new powershell script
@@ -193,6 +247,12 @@ class PowerOb(object):
 
 
     def obfuscate(self):
+        """
+        Obtain function.
+
+        Args:
+            self: (todo): write your description
+        """
         parser = argparse.ArgumentParser(description='Obfuscate a new Powershell script.')
         parser.add_argument('inputfile', type=str)
         parser.add_argument('outputfile', type=str)
@@ -225,6 +285,12 @@ class PowerOb(object):
             print(color("[+] Done. Output file located at " + args.outputfile))
 
     def list(self):
+        """
+        Lists the contents.
+
+        Args:
+            self: (todo): write your description
+        """
         parser = argparse.ArgumentParser(description='List all obfuscated files and their commands.')
 
         if not os.path.exists(db_name):
@@ -265,6 +331,12 @@ class PowerOb(object):
 
 
     def getcommand(self):
+        """
+        Implements table
+
+        Args:
+            self: (todo): write your description
+        """
         parser = argparse.ArgumentParser(description='Get a particular command from an obfuscated file.')
         #parser.add_argument('file', type=str, help='The name of the obfuscated file.')
         parser.add_argument('scriptcommand', type=str, help='The name of the command from the original script that you would like the obfuscated equivalent.')
@@ -290,6 +362,12 @@ class PowerOb(object):
 
     # Helper command to clear the database
     def cleardb(self):
+        """
+        Removes the color directories.
+
+        Args:
+            self: (todo): write your description
+        """
         try:
             if os.path.exists("powerob.db"):
                 os.remove("powerob.db")
@@ -300,6 +378,12 @@ class PowerOb(object):
 
     # Debug function
     def showdb(self):
+        """
+        Show the sqlite database
+
+        Args:
+            self: (todo): write your description
+        """
             conn = sqlite3.connect(db_name)
 
             cursor = conn.cursor()
