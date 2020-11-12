@@ -32,7 +32,7 @@ def banner():
 def python_check():
     if sys.version_info.major != 3:
         print(color("[-] Please run with Python 3. Python 2 is ded."))
-        exit()
+        sys.exit()
 
 def db_check():
     if not path.exists('db.json'):
@@ -100,7 +100,7 @@ def find_functions(input):
     function_pattern = r'([Ff]unction\s([A-Z]{1}[a-z]{2,10})-([A-Z]{1}[a-z]+[A-Z]{1}([^\s||^(]+)))'
     if not input.endswith('.ps1'):
         print(color("[-] Error: The input file must end with .ps1"))
-        exit()
+        sys.exit()
 
     try:
         f = open(input,"r")
@@ -117,13 +117,13 @@ def find_functions(input):
             return function_names
         else:
             print(color("[-] No Functions Found. Exiting..."))
-            exit()
+            return "0"
 
     except IOError as e:
       errno, strerror = e.args
       print(color("[-] I/O error({0}): {1}".format(errno,strerror)))
     except: #handle other exceptions such as attribute errors
-      print(color("[-] Unexpected error:" + sys.exc_info()[0]))
+      print(color("[-] Unexpected error:" + str(sys.exc_info()[0])))
     pass
 
 def create_obfuscated_functions(functions):
@@ -158,10 +158,10 @@ def write_obfuscated_file(inputfile, outputfile, functions):
     except IOError as e:
         errno, strerror = e.args
         print(color("[-] I/O error ({}): {}".format(errno, strerror)))
-        exit()
+        sys.exit()
     except: #handle other exceptions such as attribute errors
-        print(color("[-] Unexpected error yo:" + sys.exc_info()))
-        exit()
+        print(color("[-] Unexpected error yo:" + str(sys.exc_info())))
+        sys.exit()
     pass
 
 #
@@ -203,6 +203,9 @@ class PowerOb(object):
 
         # Find the functions. Returns list of functions in the inputfile
         functions = find_functions(args.inputfile)
+        
+        if functions == "0":
+            exit()
 
         # Generate random strings. This is where substitutions{} is populated. Returns list. eg. [original_function, obfuscated_function]
         obfuscated_functions = create_obfuscated_functions(functions)
@@ -229,39 +232,39 @@ class PowerOb(object):
 
         if not os.path.exists(db_name):
             print(color("[-] No functions or files have been obfuscated."))
-            exit()
+            sys.exit()
+        else:
+            try:
+                conn = sqlite3.connect(db_name)
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
 
-        try:
-            conn = sqlite3.connect(db_name)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
+                cursor.execute("SELECT * FROM Files")
+                file_rows = cursor.fetchall()
 
-            cursor.execute("SELECT * FROM Files")
-            file_rows = cursor.fetchall()
+                for filename in file_rows:
 
-            for filename in file_rows:
+                    print(color('[*] Obfuscated File: ' + filename['FILENAME']))
 
-                print(color('[*] Obfuscated File: ' + filename['FILENAME']))
+                    print('{:<30s}{:>30s}'.format("Original Function","Obfuscated Function"))
+                    print(dashline)
 
-                print('{:<30s}{:>30s}'.format("Original Function","Obfuscated Function"))
-                print(dashline)
+                    cursor.execute("SELECT * FROM Functions WHERE FILE_NAME = :filename", {"filename": filename['FILENAME']})
+                    function_rows = cursor.fetchall()
 
-                cursor.execute("SELECT * FROM Functions WHERE FILE_NAME = :filename", {"filename": filename['FILENAME']})
-                function_rows = cursor.fetchall()
+                    for f in function_rows:
+                        print('{:<30}{:>25}'.format(f['OG_FUNCTION'],f['OB_FUNCTION']))       
+                    
+                    print(dashline+"\n")
 
-                for f in function_rows:
-                    print('{:<30}{:>25}'.format(f['OG_FUNCTION'],f['OB_FUNCTION']))       
-                
-                print(dashline+"\n")
+                print(color("[+] Done listing files. Over and out."))
 
-            print(color("[+] Done listing files. Over and out."))
-
-        except OSError as e:
-            errno, strerror = e.args
-            print(color("[-] I/O error ({}): {}".format(errno, strerror)))
-        except: #handle other exceptions such as attribute errors
-            print(color("[-] Unexpected error opening db file: " + str(sys.exc_info())))
-        pass
+            except OSError as e:
+                errno, strerror = e.args
+                print(color("[-] I/O error ({}): {}".format(errno, strerror)))
+            except: #handle other exceptions such as attribute errors
+                print(color("[-] Unexpected error opening db file: " + str(sys.exc_info())))
+            pass
 
 
     def getcommand(self):
