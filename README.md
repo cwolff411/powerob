@@ -1,6 +1,8 @@
 # Powerob
 An on-the-fly Powershell script obfuscator meant for red team engagements. Built out of necessity.
 
+This only obfuscates functions found in PowerShell scripts. Roadmap includes removing comments and obfuscating variables.
+
 ### Installation
 `git clone https://github.com/cwolff411/powerob`
 

@@ -24,7 +24,7 @@ def banner():
     / ___| (_) \ V  V |  __| | / \_//| |_) |
     \/    \___/ \_/\_/ \___|_| \___/ |_.__/ 
 
-            author: Cory Wolff <visnet>
+            author: Cory Wolff <fenrir>
             company: Layer 8 <layer8security.com>
     """)
     print(dashline + "\n")
@@ -97,7 +97,8 @@ def save_functions(filename, functions):
 def find_functions(input):
     print(color("[+] Loading the Powershell script"))
 
-    function_pattern = r'([Ff]unction\s([A-Z]{1}[a-z]{2,10})-([A-Z]{1}[a-z]+[A-Z]{1}([^\s||^(]+)))'
+    #function_pattern = r'([Ff]unction\s([A-Z]{1}[a-z]{2,10})-([A-Z]{1}[a-z]+[A-Z]{1}([^\s||^(]+)))'
+    function_pattern = r'([Ff]unction\s(.*)\s\{)'
     if not input.endswith('.ps1'):
         print(color("[-] Error: The input file must end with .ps1"))
         sys.exit()
