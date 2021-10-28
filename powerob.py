@@ -141,7 +141,7 @@ def create_obfuscated_functions(functions):
 
     return substitutions
 
-def write_obfuscated_file(inputfile, outputfile, functions):
+def write_functions_to_file(inputfile, outputfile, functions):
 
     try:
         # Open the file
@@ -160,6 +160,36 @@ def write_obfuscated_file(inputfile, outputfile, functions):
         errno, strerror = e.args
         print(color("[-] I/O error ({}): {}".format(errno, strerror)))
         sys.exit()
+    except: #handle other exceptions such as attribute errors
+        print(color("[-] Unexpected error yo:" + str(sys.exc_info())))
+        sys.exit()
+    pass
+
+def remove_comments(outputfile):
+
+    print(color("[+] Removing Comments"))
+
+    comments_regex1 = r'<#((.|\n)*?)#>'
+    comments_regex2 = r'#.*'
+
+    try:
+        with open(outputfile) as file:
+            file_as_str = file.read()
+            newtext = re.sub(comments_regex1, '', file_as_str)
+            newtext = re.sub(comments_regex2, '', newtext)
+            newtext = newtext.lstrip(' \n')
+
+        with open(outputfile, "w+") as f:
+            f.write(newtext)
+            f.close()
+
+        return True
+
+    except IOError as e:
+        errno, strerror = e.args
+        print(color("[-] I/O error ({}): {}".format(errno, strerror)))
+        sys.exit()
+
     except: #handle other exceptions such as attribute errors
         print(color("[-] Unexpected error yo:" + str(sys.exc_info())))
         sys.exit()
@@ -211,7 +241,8 @@ class PowerOb(object):
         # Generate random strings. This is where substitutions{} is populated. Returns list. eg. [original_function, obfuscated_function]
         obfuscated_functions = create_obfuscated_functions(functions)
 
-        obfuscated_file = write_obfuscated_file(args.inputfile, args.outputfile, obfuscated_functions)
+        obfuscated_file = write_functions_to_file(args.inputfile, args.outputfile, obfuscated_functions)
+        remove_comments(args.outputfile)
 
         if obfuscated_file:
 

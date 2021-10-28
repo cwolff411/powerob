@@ -1,7 +1,14 @@
+![fenrir-desktop-bg](https://user-images.githubusercontent.com/8293038/133816238-7152221b-c37d-46ca-831d-ff636178f44f.png)
+
 # Powerob
 An on-the-fly Powershell script obfuscator meant for red team engagements. Built out of necessity.
 
-This only obfuscates functions found in PowerShell scripts. Roadmap includes removing comments and obfuscating variables.
+This only obfuscates functions and removes found in PowerShell scripts. Roadmap includes bfuscating variables. Pull requests and collaborative welcomed.
+
+### About
+This was built out of the need to bypass endpoint security on a recent engagement. During priv esc attempts I could not download [PowerUp.ps1](https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1) until it was obfuscated.
+
+This is technically v2 and has been updated to remove comments.
 
 ### Installation
 `git clone https://github.com/cwolff411/powerob`
@@ -33,12 +40,6 @@ For reference on the fly for when you forget. Takes the original command name an
 
 Maintenance function to clear the db of past obfuscated files and functions.
 
-### About
-This was built out of the need to bypass endpoint security on a recent engagement. During priv esc attempts I could not download [PowerUp.ps1](https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1) until it was obfuscated.
-
-This is v1. It obfuscates the functions only and I will enhance the functionality as time allows. Pull requests and collaboration welcomed.
-
-I work at [Layer 8 Security](https://layer8security.com). Come say hi.
 
 ### License
 [MIT License](https://opensource.org/licenses/MIT)
