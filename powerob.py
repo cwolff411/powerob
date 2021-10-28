@@ -97,8 +97,8 @@ def save_functions(filename, functions):
 def find_functions(input):
     print(color("[+] Loading the Powershell script"))
 
-    #function_pattern = r'([Ff]unction\s([A-Z]{1}[a-z]{2,10})-([A-Z]{1}[a-z]+[A-Z]{1}([^\s||^(]+)))'
-    function_pattern = r'([Ff]unction\s(.*)\s\{)'
+    function_pattern = r'([Ff]unction\s([A-Z]{1}[a-z]{2,10})-([A-Z]{1}[a-z]+[A-Z]{1}([^\s||^(]+)))'
+    #function_pattern = r'([Ff]unction\s(.*)\s\{)'
     if not input.endswith('.ps1'):
         print(color("[-] Error: The input file must end with .ps1"))
         sys.exit()
@@ -175,12 +175,12 @@ def remove_comments(outputfile):
     try:
         with open(outputfile) as file:
             file_as_str = file.read()
-            newtext = re.sub(comments_regex1, '', file_as_str)
-            newtext = re.sub(comments_regex2, '', newtext)
-            newtext = newtext.lstrip(' \n')
+            nocomments = re.sub(comments_regex1, '', file_as_str)
+            nocomments = re.sub(comments_regex2, '', nocomments)
+            nocomments = nocomments.lstrip(' \n')
 
         with open(outputfile, "w+") as f:
-            f.write(newtext)
+            f.write(nocomments)
             f.close()
 
         return True
